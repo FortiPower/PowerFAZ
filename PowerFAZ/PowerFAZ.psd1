@@ -24,7 +24,7 @@
     Author            = 'Alexis La Goutte'
 
     # Company or vendor of this module
-    CompanyName       = 'Unknown'
+    #CompanyName       = 'Unknown'
 
     # Copyright statement for this module
     Copyright         = '(c) Alexis La Goutte. All rights reserved.'
@@ -63,7 +63,7 @@
     # TypesToProcess = @()
 
     # Format files (.ps1xml) to be loaded when importing this module
-    FormatsToProcess  = 'PowerFAZ.Format.ps1xml'
+    #FormatsToProcess  = 'PowerFAZ.Format.ps1xml'
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     # NestedModules = @()
