@@ -42,7 +42,7 @@ function Get-FAZDvmdbAdom {
         $method = "get"
 
         if ( $PsBoundParameters.ContainsKey('adom') ) {
-            $url + "/" + $adom
+            $url += "/" + $adom
         }
 
         Invoke-FAZRestMethod -method $method -uri $url -connection $connection
