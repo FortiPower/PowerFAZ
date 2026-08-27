@@ -91,9 +91,16 @@ function Get-FAZLogviewLogsearch {
     Process {
 
         $uri = "/logview/adom/root/logsearch/$($tid)"
-
-        Invoke-FAZRestMethod -method "get" -jsonrpc "2.0" -uri $uri -connection $connection
-
+        $wait = 0
+        do {
+            #Use exponential backoff for waiting
+            $sleeptime = [Math]::Pow(2, $wait)
+            Start-Sleep $sleeptime
+            $log = Invoke-FAZRestMethod -method "get" -jsonrpc "2.0" -uri $uri -connection $connection
+            $wait++
+            Write-Verbose "Percentage=$($log.percentage), status_code=$($log.status.code), status_message=$($log.status.message)"
+        } while ($log.percentage -ne 100)
+        $log.data
     }
 
     End {
