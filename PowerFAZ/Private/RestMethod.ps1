@@ -66,8 +66,12 @@ function Invoke-FAZRestMethod {
                 $body = new-Object -TypeName PSObject
             }
             #Add uri and apiver to body...
-            $body | add-member -name "url" -membertype NoteProperty -Value $uri
-            $body | add-member -name "apiver" -membertype NoteProperty -Value 3
+            if (-not $body.url) {
+                $body | add-member -name "url" -membertype NoteProperty -Value $uri
+            }
+            if (-not $body.apiver) {
+                $body | add-member -name "apiver" -membertype NoteProperty -Value 3
+            }
 
             $irm_body = @{
                 id      = $connection.id++
