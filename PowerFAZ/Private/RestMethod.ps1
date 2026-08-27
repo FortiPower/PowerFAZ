@@ -28,6 +28,9 @@ function Invoke-FAZRestMethod {
         [ValidateSet("get", "set", "add", "update", "delete", "clone", "exec", IgnoreCase = $false)]
         [String]$method = "get",
         [Parameter(Mandatory = $false)]
+        [ValidateSet("2.0", IgnoreCase = $false)]
+        [String]$jsonrpc,
+        [Parameter(Mandatory = $false)]
         [psobject]$body,
         [Parameter(Mandatory = $false)]
         [psobject]$connection
@@ -54,21 +57,43 @@ function Invoke-FAZRestMethod {
         $fullurl = "https://${Server}:${port}/jsonrpc"
         $url = $uri
 
-        #Make params data (with uri, data, filter...)
-        $params = @{
-            url = $url
-        }
-        if ($body) {
-            $params.data = $body
-        }
+        #Use jsonrpc 2.0 query
+        if ( $PsBoundParameters.ContainsKey('jsonrpc') ) {
+            #Make Invoke-RestMethod body query
 
-        #Make Invoke-RestMethod body query
-        $irm_body = @{
-            id      = $connection.id++
-            method  = $method
-            session = $connection.session
-            verbose = 1
-            params  = @($params)
+            #No $body ?
+            if (-not $body) {
+                $body = new-Object -TypeName PSObject
+            }
+            #Add uri and apiver to body...
+            $body | add-member -name "url" -membertype NoteProperty -Value $uri
+            $body | add-member -name "apiver" -membertype NoteProperty -Value 3
+
+            $irm_body = @{
+                id      = $connection.id++
+                method  = $method
+                session = $connection.session
+                params  = @($body)
+                jsonrpc = "2.0"
+            }
+        }
+        else {
+            #Make params data (with uri, data, filter...)
+            $params = @{
+                url = $url
+            }
+            if ($body) {
+                $params.data = $body
+            }
+
+            #Make Invoke-RestMethod body query
+            $irm_body = @{
+                id      = $connection.id++
+                method  = $method
+                session = $connection.session
+                verbose = 1
+                params  = @($params)
+            }
         }
 
         try {
@@ -82,12 +107,23 @@ function Invoke-FAZRestMethod {
             throw "Unable to use FortiAnalyzer API"
         }
 
-        #Check status code
-        if ($response.result.status.code -ne "0") {
-            throw "Unable to use FortiAnalyzer API (" + $response.result.status.code + ") " + $response.result.status.message
+        #Use jsonrpc 2.0 query
+        if ( $PsBoundParameters.ContainsKey('jsonrpc') ) {
+            #Check response code
+            if ($response.error) {
+                throw "Unable to use FortiAnalyzer API (" + $response.error.code + ") " + $response.error.message
+            }
+            $response.result
+        }
+        else {
+
+            #Check status code
+            if ($response.result.status.code -ne "0") {
+                throw "Unable to use FortiAnalyzer API (" + $response.result.status.code + ") " + $response.result.status.message
+            }
+            $response.result.data
         }
 
-        $response.result.data
 
     }
 
