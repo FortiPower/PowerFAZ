@@ -19,9 +19,16 @@ function Add-FAZLogviewLogsearch {
 
         Add Log Search query
 
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -filter "srcip == 192.0.2.1 and dstport == 53"
+
+        Add Log Search query with a filter
+
     #>
 
     Param(
+        [Parameter(Mandatory = $false)]
+        [string]$filter,
         [Parameter(Mandatory = $false)]
         [psobject]$connection = $DefaultFAZConnection
     )
@@ -53,6 +60,10 @@ function Add-FAZLogviewLogsearch {
 
         $_logsearch | add-member -name "limit" -membertype NoteProperty -Value 10000
 
+        #add filter
+        if ( $PsBoundParameters.ContainsKey('filter') ) {
+            $_logsearch | add-member -name "filter" -membertype NoteProperty -Value $filter
+        }
         $tid = Invoke-FAZRestMethod -method "add" -body $_logsearch -jsonrpc "2.0" -uri $uri -connection $connection
         $tid.tid
 
