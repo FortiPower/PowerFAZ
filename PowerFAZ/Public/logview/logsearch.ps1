@@ -72,10 +72,24 @@ function Get-FAZLogviewLogsearch {
         Get id of search
 
         .EXAMPLE
-        Add-FAZLogviewLogsearch
+        Get-FAZLogviewLogsearch -tid XXXXX
 
-        Get information about adom
+        Get Log from tid XXXXX
 
+        .EXAMPLE
+        Get-FAZLogviewLogsearch -tid XXXXX -offset 1000
+
+        Get Log from tid XXXXX with offset 1000
+
+        .EXAMPLE
+        Get-FAZLogviewLogsearch -tid XXXXX -offset 2000 -limit 500
+
+        Get Log from tid XXXXX with offset 1000 with limit 500
+
+        .EXAMPLE
+        Get-FAZLogviewLogsearch -tid XXXXX -onlylog
+
+        Get Log from tid XXXXX and only display log (no metadata)
     #>
 
     Param(
@@ -85,6 +99,8 @@ function Get-FAZLogviewLogsearch {
         [int]$limit = 1000,
         [Parameter(Mandatory = $false)]
         [int]$offset = 0,
+        [Parameter(Mandatory = $false)]
+        [switch]$onlylog,
         [Parameter(Mandatory = $false)]
         [psobject]$connection = $DefaultFAZConnection
     )
@@ -111,7 +127,14 @@ function Get-FAZLogviewLogsearch {
             Write-Verbose "Percentage=$($log.percentage), status_code=$($log.status.code), status_message=$($log.status.message)"
         } while ($log.percentage -ne 100)
         Write-Verbose "return-lines=$($log.'return-lines'), total-use-time=$($log.'total-use-time'), total-count=$($log.'total-count'), scanned-logs=$($log.'scanned-logs')"
-        $log.data
+
+        #Only display logs
+        if ( $PsBoundParameters.ContainsKey('onlylog') ) {
+            $log.data
+        }
+        else {
+            $log
+        }
     }
 
     End {
