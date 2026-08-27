@@ -82,6 +82,10 @@ function Get-FAZLogviewLogsearch {
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, position = 1)]
         [String]$tid,
         [Parameter(Mandatory = $false)]
+        [int]$limit = 1000,
+        [Parameter(Mandatory = $false)]
+        [int]$offset = 0,
+        [Parameter(Mandatory = $false)]
         [psobject]$connection = $DefaultFAZConnection
     )
 
@@ -91,15 +95,22 @@ function Get-FAZLogviewLogsearch {
     Process {
 
         $uri = "/logview/adom/root/logsearch/$($tid)"
+
+        $_logsearch = new-Object -TypeName PSObject
+
+        $_logsearch | add-member -name "limit" -membertype NoteProperty -Value $limit
+        $_logsearch | add-member -name "offset" -membertype NoteProperty -Value $offset
+
         $wait = 0
         do {
             #Use exponential backoff for waiting
             $sleeptime = [Math]::Pow(2, $wait)
             Start-Sleep $sleeptime
-            $log = Invoke-FAZRestMethod -method "get" -jsonrpc "2.0" -uri $uri -connection $connection
+            $log = Invoke-FAZRestMethod -method "get" -jsonrpc "2.0" -body $_logsearch -uri $uri -connection $connection
             $wait++
             Write-Verbose "Percentage=$($log.percentage), status_code=$($log.status.code), status_message=$($log.status.message)"
         } while ($log.percentage -ne 100)
+        Write-Verbose "return-lines=$($log.'return-lines'), total-use-time=$($log.'total-use-time'), total-count=$($log.'total-count'), scanned-logs=$($log.'scanned-logs')"
         $log.data
     }
 
