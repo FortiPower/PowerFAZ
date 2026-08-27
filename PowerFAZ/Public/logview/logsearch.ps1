@@ -117,3 +117,41 @@ function Get-FAZLogviewLogsearch {
     End {
     }
 }
+
+function Get-FAZLogviewLogsearchCount {
+
+    <#
+        .SYNOPSIS
+        Add Logview Logsearch
+
+        .DESCRIPTION
+        Get id of search count
+
+        .EXAMPLE
+        Get-FAZLogviewLogsearchCount -tid XXXXXX
+
+        Get the total number of logs with the task ID.
+
+    #>
+
+    Param(
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, position = 1)]
+        [String]$tid,
+        [Parameter(Mandatory = $false)]
+        [psobject]$connection = $DefaultFAZConnection
+    )
+
+    Begin {
+    }
+
+    Process {
+
+        $uri = "/logview/adom/root/logsearch/count/$($tid)"
+
+        $count = Invoke-FAZRestMethod -method "get" -jsonrpc "2.0" -uri $uri -connection $connection
+        $count
+    }
+
+    End {
+    }
+}
