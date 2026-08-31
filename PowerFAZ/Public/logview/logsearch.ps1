@@ -51,6 +51,10 @@ function Add-FAZLogviewLogsearch {
         [Parameter(Mandatory = $false)]
         [string]$filter,
         [Parameter(Mandatory = $false)]
+        [string]$devname,
+        [Parameter(Mandatory = $false)]
+        [string]$vdom,
+        [Parameter(Mandatory = $false)]
         [psobject]$connection = $DefaultFAZConnection
     )
 
@@ -67,7 +71,15 @@ function Add-FAZLogviewLogsearch {
 
         $_device = new-Object -TypeName PSObject
 
-        $_device | add-member -name "devid" -membertype NoteProperty -Value All_FortiGate
+        if ( $PsBoundParameters.ContainsKey('devname') ) {
+            #Check if there is also vdom info ?
+            if ( $PsBoundParameters.ContainsKey('vdom') ) {
+                $devname += "[$vdom]"
+            }
+           $_device | add-member -name "devname" -membertype NoteProperty -Value $devname
+        } else {
+            $_device | add-member -name "devid" -membertype NoteProperty -Value All_FortiGate
+        }
 
         $_logsearch | add-member -name "device" -membertype NoteProperty -Value @($_device)
 
