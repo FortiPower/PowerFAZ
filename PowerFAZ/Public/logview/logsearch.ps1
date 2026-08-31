@@ -28,6 +28,27 @@ function Add-FAZLogviewLogsearch {
 
     Param(
         [Parameter(Mandatory = $false)]
+        [string[]]$srcip,
+        [Parameter(Mandatory = $false)]
+        [string[]]$srcintf,
+        [Parameter(Mandatory = $false)]
+        [string[]]$dstip,
+        [Parameter(Mandatory = $false)]
+        [string[]]$dstintf,
+        [Parameter(Mandatory = $false)]
+        [ValidateRange(0, 65535)]
+        [int[]]$dstport,
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('accept', 'client-rst', 'server-rst', 'close', 'ip-conn', 'timeout', IgnoreCase = $false)]
+        [string[]]$action,
+        [Parameter(Mandatory = $false)]
+        [int[]]$policyid,
+        [Parameter(Mandatory = $false)]
+        [string[]]$poluuid,
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('==', '!=', '<', '<=', '>', '>=', '&', 'in', 'contain', 'like', '!like', 'glob', '!glob', '&&', '||', IgnoreCase = $false)]
+        [string]$operator = "==",
+        [Parameter(Mandatory = $false)]
         [string]$filter,
         [Parameter(Mandatory = $false)]
         [psobject]$connection = $DefaultFAZConnection
@@ -61,8 +82,45 @@ function Add-FAZLogviewLogsearch {
         $_logsearch | add-member -name "limit" -membertype NoteProperty -Value 10000
 
         #add filter
-        if ( $PsBoundParameters.ContainsKey('filter') ) {
-            $_logsearch | add-member -name "filter" -membertype NoteProperty -Value $filter
+        $cfilter = @()
+        if ( $PsBoundParameters.ContainsKey('srcip') ) {
+            $cfilter += "srcip" + $operator + ($srcip -join ",")
+        }
+
+        if ( $PsBoundParameters.ContainsKey('srcintf') ) {
+            $cfilter += "srcintf" + $operator + ($srcintf -join ",")
+        }
+
+        if ( $PsBoundParameters.ContainsKey('dstip') ) {
+            $cfilter += "dstip" + $operator + ($dstip -join ",")
+        }
+
+        if ( $PsBoundParameters.ContainsKey('dstintf') ) {
+            $cfilter += "dstintf" + $operator + ($dstintf -join ",")
+        }
+
+        if ( $PsBoundParameters.ContainsKey('dstport') ) {
+            $cfilter += "dstport" + $operator + ($dstport -join ",")
+        }
+
+        if ( $PsBoundParameters.ContainsKey('action') ) {
+            $cfilter += "action" + $operator + ($action -join ",")
+        }
+
+        if ( $PsBoundParameters.ContainsKey('policyid') ) {
+            $cfilter += "policyid" + $operator + ($policyid -join ",")
+        }
+
+        if ( $PsBoundParameters.ContainsKey('poluuid') ) {
+            $cfilter += "poluuid" + $operator + ($poluuid -join ",")
+        }
+
+        if ( $PsBoundParameters.ContainsKey('filter')) {
+                $cfilter += $filter
+        }
+
+        if ($cfilter) {
+            $_logsearch | add-member -name "filter" -membertype NoteProperty -Value ( $cfilter -join " and ")
         }
         $tid = Invoke-FAZRestMethod -method "add" -body $_logsearch -jsonrpc "2.0" -uri $uri -connection $connection
         $tid.tid
