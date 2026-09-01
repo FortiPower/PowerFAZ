@@ -51,6 +51,8 @@ function Add-FAZLogviewLogsearch {
         [Parameter(Mandatory = $false)]
         [string]$filter,
         [Parameter(Mandatory = $false)]
+        [string]$devid,
+        [Parameter(Mandatory = $false)]
         [string]$devname,
         [Parameter(Mandatory = $false)]
         [string]$vdom,
@@ -76,9 +78,22 @@ function Add-FAZLogviewLogsearch {
             if ( $PsBoundParameters.ContainsKey('vdom') ) {
                 $devname += "[$vdom]"
             }
-           $_device | add-member -name "devname" -membertype NoteProperty -Value $devname
-        } else {
-            $_device | add-member -name "devid" -membertype NoteProperty -Value All_FortiGate
+            $_device | add-member -name "devname" -membertype NoteProperty -Value $devname
+        }
+        else {
+            #if not devname, look there is a devid (=serial number)
+            if ( $PsBoundParameters.ContainsKey('devid') ) {
+                #Check if there is also vdom info ?
+                if ( $PsBoundParameters.ContainsKey('vdom') ) {
+                    $devid += "[$vdom]"
+                }
+            }
+            else {
+                #by default get All Fortigate
+                $devid = "All_FortiGate"
+            }
+
+            $_device | add-member -name "devid" -membertype NoteProperty -Value $devid
         }
 
         $_logsearch | add-member -name "device" -membertype NoteProperty -Value @($_device)
@@ -128,7 +143,7 @@ function Add-FAZLogviewLogsearch {
         }
 
         if ( $PsBoundParameters.ContainsKey('filter')) {
-                $cfilter += $filter
+            $cfilter += $filter
         }
 
         if ($cfilter) {
