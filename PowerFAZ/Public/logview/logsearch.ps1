@@ -50,6 +50,9 @@ function Add-FAZLogviewLogsearch {
         [string]$operator = "==",
         [Parameter(Mandatory = $false)]
         [string]$filter,
+        [Parameter (Mandatory = $false)]
+        [ValidateSet('1h', '6h', '1d', '7d', '30d', IgnoreCase = $false)]
+        [string]$since = '1h',
         [Parameter(Mandatory = $false)]
         [string]$devid,
         [Parameter(Mandatory = $false)]
@@ -102,7 +105,18 @@ function Add-FAZLogviewLogsearch {
 
         $_time = new-Object -TypeName PSObject
 
-        $_time | add-member -name "last-n-hours" -membertype NoteProperty -Value 1
+        #get log from last 1hour by default but can be change
+        $end = Get-Date
+        Switch ($since) {
+            '1h' { $start = $end.Addhours(-1) }
+            '6h' { $start = $end.Addhours(-1 * 6) }
+            '1d' { $start = $end.Addhours(-24) }
+            '7d' { $start = $end.Addhours(-24 * 7) }
+            '30d' { $start = $end.Addhours(-24 * 30) }
+        }
+
+        $_time | add-member -name "end" -membertype NoteProperty -Value $end.ToString("yyyy-MM-dd HH:mm")
+        $_time | add-member -name "start" -membertype NoteProperty -Value $start.ToString("yyyy-MM-dd HH:mm")
 
         $_logsearch | add-member -name "time-range" -membertype NoteProperty -Value $_time
 
