@@ -217,6 +217,12 @@ function Get-FAZLogviewLogsearch {
         Get-FAZLogviewLogsearch -tid XXXXX -adom MyAdom
 
         Get Log from tid XXXXX on adom MyAdmin
+
+        .EXAMPLE
+        $InformationPreference = 'continue'
+        PS > Get-FAZLogviewLogsearch -tid XXXXX
+
+        Get Log from tid XXXX with information (Percentage, status code/message and return lines, total count...)
     #>
 
     Param(
@@ -258,9 +264,9 @@ function Get-FAZLogviewLogsearch {
             Start-Sleep $sleeptime
             $log = Invoke-FAZRestMethod -method "get" -jsonrpc "2.0" -body $_logsearch -uri $uri -connection $connection
             $wait++
-            Write-Verbose "Percentage=$($log.percentage), status_code=$($log.status.code), status_message=$($log.status.message)"
+            Write-Information "Percentage=$($log.percentage), status_code=$($log.status.code), status_message=$($log.status.message)"
         } while ($log.percentage -ne 100)
-        Write-Verbose "return-lines=$($log.'return-lines'), total-use-time=$($log.'total-use-time'), total-count=$($log.'total-count'), scanned-logs=$($log.'scanned-logs')"
+        Write-Information "return-lines=$($log.'return-lines'), total-use-time=$($log.'total-use-time'), total-count=$($log.'total-count'), scanned-logs=$($log.'scanned-logs')"
 
         #Only display logs
         if ( $PsBoundParameters.ContainsKey('onlylog') ) {
