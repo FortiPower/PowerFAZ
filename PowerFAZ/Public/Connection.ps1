@@ -169,6 +169,44 @@ function Connect-FAZ {
     }
 }
 
+function Set-FAZConnection {
+
+    <#
+        .SYNOPSIS
+        Configure FAZ connection Setting
+
+        .DESCRIPTION
+        Configure FAZ connection Setting (ADOM...)
+
+        .EXAMPLE
+        Set-FAZConnection -adom MyAdom
+
+        Configure default connection adom to MyAdom
+
+    #>
+
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    Param(
+        [Parameter(Mandatory = $false)]
+        [string]$adom,
+        [Parameter(Mandatory = $false)]
+        [psobject]$connection = $DefaultFAZConnection
+    )
+
+    Begin {
+    }
+
+    Process {
+
+        if ($PSCmdlet.ShouldProcess($connection.server, 'Set default adom on connection')) {
+            $connection.adom = $adom
+        }
+
+    }
+
+    End {
+    }
+}
 
 function Disconnect-FAZ {
 
