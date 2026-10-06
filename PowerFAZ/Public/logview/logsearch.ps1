@@ -24,6 +24,11 @@ function Add-FAZLogviewLogsearch {
 
         Add Log Search query with a filter
 
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -filter "srcip == 192.0.2.1 and dstport == 53" -adom MyAdom
+
+        Add Log Search query with a filter on adom MyAdom
+
     #>
 
     Param(
@@ -60,6 +65,8 @@ function Add-FAZLogviewLogsearch {
         [Parameter(Mandatory = $false)]
         [string]$vdom,
         [Parameter(Mandatory = $false)]
+        [string]$adom,
+        [Parameter(Mandatory = $false)]
         [psobject]$connection = $DefaultFAZConnection
     )
 
@@ -68,7 +75,12 @@ function Add-FAZLogviewLogsearch {
 
     Process {
 
-        $uri = "/logview/adom/root/logsearch"
+        #if don't specify adom set adom use for connection
+        if ( -not $PsBoundParameters.ContainsKey('adom')) {
+            $adom = $connection.adom
+        }
+
+        $uri = "/logview/adom/$($adom)/logsearch"
 
         $_logsearch = new-Object -TypeName PSObject
 
@@ -200,6 +212,11 @@ function Get-FAZLogviewLogsearch {
         Get-FAZLogviewLogsearch -tid XXXXX -onlylog
 
         Get Log from tid XXXXX and only display log (no metadata)
+
+        .EXAMPLE
+        Get-FAZLogviewLogsearch -tid XXXXX -adom MyAdom
+
+        Get Log from tid XXXXX on adom MyAdmin
     #>
 
     Param(
@@ -212,6 +229,8 @@ function Get-FAZLogviewLogsearch {
         [Parameter(Mandatory = $false)]
         [switch]$onlylog,
         [Parameter(Mandatory = $false)]
+        [string]$adom,
+        [Parameter(Mandatory = $false)]
         [psobject]$connection = $DefaultFAZConnection
     )
 
@@ -220,7 +239,12 @@ function Get-FAZLogviewLogsearch {
 
     Process {
 
-        $uri = "/logview/adom/root/logsearch/$($tid)"
+        #if don't specify adom set adom use for connection
+        if ( -not $PsBoundParameters.ContainsKey('adom')) {
+            $adom = $connection.adom
+        }
+
+        $uri = "/logview/adom/$($adom)/logsearch/$($tid)"
 
         $_logsearch = new-Object -TypeName PSObject
 
@@ -265,11 +289,17 @@ function Get-FAZLogviewLogsearchCount {
 
         Get the total number of logs with the task ID.
 
+        .EXAMPLE
+        Get-FAZLogviewLogsearchCount -tid XXXXXX -adom MyAdom
+
+        Get the total number of logs with the task ID on Adom MyAdom
     #>
 
     Param(
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, position = 1)]
         [String]$tid,
+        [Parameter(Mandatory = $false)]
+        [string]$adom,
         [Parameter(Mandatory = $false)]
         [psobject]$connection = $DefaultFAZConnection
     )
@@ -279,7 +309,12 @@ function Get-FAZLogviewLogsearchCount {
 
     Process {
 
-        $uri = "/logview/adom/root/logsearch/count/$($tid)"
+        #if don't specify adom set adom use for connection
+        if ( -not $PsBoundParameters.ContainsKey('adom')) {
+            $adom = $connection.adom
+        }
+
+        $uri = "/logview/adom/$($adom)/logsearch/count/$($tid)"
 
         $count = Invoke-FAZRestMethod -method "get" -jsonrpc "2.0" -uri $uri -connection $connection
         $count
