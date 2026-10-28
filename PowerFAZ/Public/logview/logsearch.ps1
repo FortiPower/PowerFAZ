@@ -22,16 +22,24 @@ function Add-FAZLogviewLogsearch {
         .EXAMPLE
         Add-FAZLogviewLogsearch -filter "srcip == 192.0.2.1 and dstport == 53"
 
-        Add Log Search query with a filter
+        Add Log Search Traffic query with a filter
+
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -logtype event
+
+        Add Log Search Event query
 
         .EXAMPLE
         Add-FAZLogviewLogsearch -filter "srcip == 192.0.2.1 and dstport == 53" -adom MyAdom
 
-        Add Log Search query with a filter on adom MyAdom
+        Add Log Search Traffic query with a filter on adom MyAdom
 
     #>
 
     Param(
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("traffic", "app-ctrl", "attack", "content", "dlp", "emailfilter", "event", "history", "virus", "voip", "webfilter", "netscan", "fct-event", "fct-traffic", "waf", "gtp")]
+        [string]$logtype = "traffic",
         [Parameter(Mandatory = $false)]
         [string[]]$srcip,
         [Parameter(Mandatory = $false)]
@@ -84,7 +92,7 @@ function Add-FAZLogviewLogsearch {
 
         $_logsearch = new-Object -TypeName PSObject
 
-        $_logsearch | add-member -name "logtype" -membertype NoteProperty -Value "traffic"
+        $_logsearch | add-member -name "logtype" -membertype NoteProperty -Value $logtype
 
         $_device = new-Object -TypeName PSObject
 
