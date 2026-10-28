@@ -81,30 +81,6 @@ function Connect-FAZ {
 
         $connection = @{server = ""; session = ""; websession = ""; port = ""; headers = ""; invokeParams = ""; adom = ""; version = "" ; id = 0 }
 
-        #If there is a password (and a user), create a credential
-        if ($Password) {
-            $Credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
-        }
-        #Not Credential (and no password)
-        if ($null -eq $Credential) {
-            $Credential = Get-Credential -Message 'Please enter administrative credential for your FortiAnalyzer'
-        }
-
-        $postParams = @{
-            id      = $connection.id++
-            method  = "exec"
-            verbose = 1
-            session = $null
-            params  = @(
-                @{
-                    data = @{
-                        user   = $Credential.username;
-                        passwd = $Credential.GetNetworkCredential().Password;
-                    }
-                    url  = 'sys/login/user'
-                }
-            )
-        }
         $invokeParams = @{DisableKeepAlive = $false; UseBasicParsing = $true; SkipCertificateCheck = $SkipCertificateCheck; TimeoutSec = $Timeout }
 
         if ("Desktop" -eq $PSVersionTable.PsEdition) {
@@ -132,6 +108,31 @@ function Connect-FAZ {
         }
 
         $uri = "https://${Server}:${port}/jsonrpc"
+
+        #If there is a password (and a user), create a credential
+        if ($Password) {
+            $Credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
+        }
+        #Not Credential (and no password)
+        if ($null -eq $Credential) {
+            $Credential = Get-Credential -Message 'Please enter administrative credential for your FortiAnalyzer'
+        }
+
+        $postParams = @{
+            id      = $connection.id++
+            method  = "exec"
+            verbose = 1
+            session = $null
+            params  = @(
+                @{
+                    data = @{
+                        user   = $Credential.username;
+                        passwd = $Credential.GetNetworkCredential().Password;
+                    }
+                    url  = 'sys/login/user'
+                }
+            )
+        }
 
         try {
             $irmResponse = Invoke-RestMethod $uri -Method POST -Body ($postParams | ConvertTo-Json -Depth 10) -SessionVariable FAZ @invokeParams
