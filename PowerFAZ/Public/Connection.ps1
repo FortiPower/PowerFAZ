@@ -41,6 +41,12 @@ function Connect-FAZ {
       Connect to a FortiAnalyzer with IP 192.0.2.1 using Username and Password
 
       .EXAMPLE
+      $apiToken = Get-Content faz_api_token.txt
+      PS > Connect-FAZ -Server -192.0.2.1 -ApiToken $apiToken
+
+      Connect to a FortiAnalyzer with IP 192.0.2.1 and passing api token
+
+      .EXAMPLE
       $fw1 = Connect-FAZ -Server 192.0.2.1
       Connect to a FortiAnalyzer with IP 192.0.2.1 and store connection info to $fw1 variable
 
@@ -51,16 +57,18 @@ function Connect-FAZ {
       and don't store connection on global ($DefaultFAZConnection) variable
 
   #>
-
+    [CmdletBinding(DefaultParameterSetName = 'login')]
     Param(
         [Parameter(Mandatory = $true, position = 1)]
         [String]$Server,
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ParameterSetName = "login")]
         [String]$Username,
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ParameterSetName = "login")]
         [SecureString]$Password,
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, ParameterSetName = "login")]
         [PSCredential]$Credential,
+        [Parameter(Mandatory = $false, ParameterSetName = "token")]
+        [string]$ApiToken,
         [Parameter(Mandatory = $false)]
         [switch]$SkipCertificateCheck = $false,
         [Parameter(Mandatory = $false)]
@@ -108,43 +116,49 @@ function Connect-FAZ {
         }
 
         $uri = "https://${Server}:${port}/jsonrpc"
-
-        #If there is a password (and a user), create a credential
-        if ($Password) {
-            $Credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
+        #API Token ?
+        if ($ApiToken) {
+            $headers += @{ "Authorization" = "Bearer $ApiToken" }
         }
-        #Not Credential (and no password)
-        if ($null -eq $Credential) {
-            $Credential = Get-Credential -Message 'Please enter administrative credential for your FortiAnalyzer'
-        }
+        else {
 
-        $postParams = @{
-            id      = $connection.id++
-            method  = "exec"
-            verbose = 1
-            session = $null
-            params  = @(
-                @{
-                    data = @{
-                        user   = $Credential.username;
-                        passwd = $Credential.GetNetworkCredential().Password;
+            #If there is a password (and a user), create a credential
+            if ($Password) {
+                $Credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
+            }
+            #Not Credential (and no password)
+            if ($null -eq $Credential) {
+                $Credential = Get-Credential -Message 'Please enter administrative credential for your FortiAnalyzer'
+            }
+
+            $postParams = @{
+                id      = $connection.id++
+                method  = "exec"
+                verbose = 1
+                session = $null
+                params  = @(
+                    @{
+                        data = @{
+                            user   = $Credential.username;
+                            passwd = $Credential.GetNetworkCredential().Password;
+                        }
+                        url  = 'sys/login/user'
                     }
-                    url  = 'sys/login/user'
-                }
-            )
-        }
+                )
+            }
 
-        try {
-            $irmResponse = Invoke-RestMethod $uri -Method POST -Body ($postParams | ConvertTo-Json -Depth 10) -SessionVariable FAZ @invokeParams
-        }
-        catch {
-            Show-FAZException $_
-            throw "Unable to connect to FortiAnalyzer"
-        }
+            try {
+                $irmResponse = Invoke-RestMethod $uri -Method POST -Body ($postParams | ConvertTo-Json -Depth 10) -SessionVariable FAZ @invokeParams
+            }
+            catch {
+                Show-FAZException $_
+                throw "Unable to connect to FortiAnalyzer"
+            }
 
-        #
-        if ($irmResponse.result.status.code -ne "0") {
-            throw "Unable to connect to FortiAnalyzer (" + $irmResponse.result.status.code + ") " + $irmResponse.result.status.message
+            #
+            if ($irmResponse.result.status.code -ne "0") {
+                throw "Unable to connect to FortiAnalyzer (" + $irmResponse.result.status.code + ") " + $irmResponse.result.status.message
+            }
         }
 
         $connection.server = $server
