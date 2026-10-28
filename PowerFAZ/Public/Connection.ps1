@@ -58,6 +58,7 @@ function Connect-FAZ {
 
   #>
     [CmdletBinding(DefaultParameterSetName = 'login')]
+    [OutputType([System.Collections.Hashtable])]
     Param(
         [Parameter(Mandatory = $true, position = 1)]
         [String]$Server,
