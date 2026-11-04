@@ -20,9 +20,49 @@ function Add-FAZLogviewLogsearch {
         Add Log Search query
 
         .EXAMPLE
+        Add-FAZLogviewLogsearch -srcip 192.0.2.1
+
+        Add Log Search Traffic query with a filter on Source IP
+
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -dstip 192.0.2.1 -dstport 53
+
+        Add Log Search Traffic query with a filter on Destination IP and Destination Port
+
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -policyid 23
+
+        Add Log Search Traffic query with a filter on policy id (23)
+
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -poluuid fb549ac0-52a0-51f1-cc62-67a34958d7d9
+
+        Add Log Search Traffic query with a filter on policy uiid (fb549ac0-52a0-51f1-cc62-67a34958d7d9)
+
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -action timeout
+
+        Add Log Search Traffic query with a filter on action (timeout)
+
+        .EXAMPLE
         Add-FAZLogviewLogsearch -filter "srcip == 192.0.2.1 and dstport == 53"
 
-        Add Log Search Traffic query with a filter
+        Add Log Search Traffic query with a custom filter
+
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -devname POWERFAZ-HA_FG120G
+
+        Add Log Search Traffic query on device name POWERFAZ-HA_FG120G
+
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -devname POWERFAZ-HA_FG120G -vdom MyVDOM
+
+        Add Log Search Traffic query on device name POWERFAZ-HA_FG120 and vdom MyVDOM
+
+        .EXAMPLE
+        Add-FAZLogviewLogsearch -devid FG120GTK2600XXXX
+
+        Add Log Search Traffic query on device id (serial number) FG120GTK2600XXXX
 
         .EXAMPLE
         Add-FAZLogviewLogsearch -logtype event
