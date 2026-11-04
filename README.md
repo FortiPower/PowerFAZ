@@ -7,7 +7,7 @@ This is a Powershell module for manage a FortiAnalyzer (Fortinet) Analyzer.
 With this module (version 1.0.0) you can manage:
 
 - [dvmdb](#dvmdb) (Get Adom and device from dvmdb)
-- [Logview](#ogview) (Add logview search and get results)
+- [Logview](#logview) (Add logview search and get results)
 
 There is some extra feature
 - [Invoke API](#invoke-api)
@@ -155,6 +155,103 @@ You can get info about Adom `Get-FAZDvmdbAdom` and Device `Get-FAZDvmdbDevice` v
     [...]
 
 ```
+### logsearch
+
+You can fetch log of FortiAnalyzer using the following cmdlet `Add-FAZLogviewLogsearch`, ` Get-FAZLogviewLogsearchCount` and `Get-FAZLogviewLogsearch`
+
+You need start by using Add-FAZLogviewLogsearch for build filter and after get number of log (optional) and fetch (by step of 1000)
+
+
+```powershell
+# build filter for get all DNS log to 8.8.8.8
+    Add-FAZLogviewLogsearch -dstip 8.8.8.8 -dstport 53
+    1052639461
+#You get a number (tid => 1052639461) and you need to use for other cmdlet
+
+#for get number of log use Get-FAZLogviewLogsearchCount with tid
+
+    Get-FAZLogviewLogsearchCount -tid 1052639461
+
+    total-logs           : 583446
+    scanned-logs         : 249837
+    matched-logs         : 8497
+    elapsed-time-ms      : 1
+    estimated-remain-sec : 0
+    progress-percent     : 0
+    status               : @{code=0; message=succeeded}
+
+#you need retry and wait progress-percent need to be 100
+    Get-FAZLogviewLogsearchCount -tid 1052639461
+    total-logs           : 623553
+    scanned-logs         : 583047
+    matched-logs         : 20227
+    elapsed-time-ms      : 118
+    estimated-remain-sec : 0
+    progress-percent     : 100
+    status               : @{code=0; message=succeeded}
+
+#You can fetch log now
+    Get-FAZLogviewLogsearch -tid 1052639461
+
+    percentage     : 100
+    return-lines   : 1000
+    total-use-time : 118
+    total-count    : 20227
+    scanned-logs   : 583047
+    data           : {@{date=2026-11-04; time=16:40:39; id=7704187090031870014; itime=2026-11-04 16:40:39; euid=3;
+                    epid=1040; dsteuid=1025; dstepid=101; logflag=1; logver=704122902; type=traffic; subtype=forward;
+                    level=notice; action=accept; policyid=2; sessionid=1267344202; srcip=192.2.0.1; dstip=8.8.8.8;
+                    srcport=52593; dstport=53; trandisp=noop; duration=180; proto=17; sentbyte=90; rcvdbyte=211;
+                    sentpkt=1; rcvdpkt=1; logid=0000000013; dstunauthuser=xxxxxxxx; service=DNS; app=DNS;
+                    appcat=Network.Service; srcintfrole=lan; dstintfrole=lan; srcserver=0; dstserver=0; appid=16195;
+                    apprisk=elevated; policytype=policy; eventtime=1793770838471759208;
+                    poluuid=0c1317a6-af54-51f0-1bc5-2e60bbc5fb0d; srcmac=00:50:56:80:e7:69;
+                    mastersrcmac=00:50:56:80:e7:69; dstmac=1e:d1:18:24:e7:cd; masterdstmac=1e:d1:18:24:e7:cd;
+                    srchwvendor=VMware; srchwversion=Virtual Machine; srcfamily=Virtual Machine; srcswversion=10/11;
+                    dstswversion=10/11; devtype=Server; dstdevtype=Router; osname=Windows; dstosname=Windows;
+                    srccountry=Reserved; dstcountry=United%20States; srcintf=A-TRK-V1030; dstintf=VDL-DC-ROOT;
+                    dstunauthusersource=kerberos; applist=g-default; policyname=DNS; tz=+0100;
+                    devid=FG120GTK2600XXX; vd=MyVDOM; dtime=2026-11-04 16:40:39; itime_t=1793770839;
+                    devname=POWERFAZ-HA_FG120G},}
+                    [...]
+    status         : @{code=0; message=succeeded}
+    tid            : 1052639461
+
+    #You can only display data using -data parameter
+    #the cmdlet return 1000 lines by 1000 lines (max on FAZ API), you need to use -offset to get more log to 
+
+    #for fetch next 1000
+
+    Get-FAZLogviewLogsearch -tid 1052639461 -offset 1000
+
+    percentage     : 100
+    return-lines   : 1000
+    total-use-time : 773
+    total-count    : 8598
+    scanned-logs   : 250000
+    data           : @{...}
+    status         : @{code=0; message=succeeded}
+    tid            : 1052639461
+
+    #the cmdlet always retry to get log (can need multiple second to get log) to get more verbose you can use $informationPreference = 'continue'
+
+    $informationPreference = 'continue'
+    Get-FAZLogviewLogsearch -tid 1052639461 -offset 2000
+
+    Percentage=0, status_code=0, status_message=succeeded
+    Percentage=100, status_code=0, status_message=succeeded
+    return-lines=1000, total-use-time=583, total-count=8598, scanned-logs=250000
+
+    percentage     : 100
+    return-lines   : 1000
+    total-use-time : 583
+    total-count    : 8598
+    scanned-logs   : 250000
+    data           : @{...}
+    status         : @{code=0; message=succeeded}
+    tid            : 1052639461
+```
+
 ### Invoke API
 for example to get FortiAnalyzer System Status Info
 
