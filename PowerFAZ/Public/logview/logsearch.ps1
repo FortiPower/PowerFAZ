@@ -130,18 +130,18 @@ function Add-FAZLogviewLogsearch {
 
         $uri = "/logview/adom/$($adom)/logsearch"
 
-        $_logsearch = new-Object -TypeName PSObject
+        $_logsearch = New-Object -TypeName PSObject
 
-        $_logsearch | add-member -name "logtype" -membertype NoteProperty -Value $logtype
+        $_logsearch | Add-Member -name "logtype" -membertype NoteProperty -Value $logtype
 
-        $_device = new-Object -TypeName PSObject
+        $_device = New-Object -TypeName PSObject
 
         if ( $PsBoundParameters.ContainsKey('devname') ) {
             #Check if there is also vdom info ?
             if ( $PsBoundParameters.ContainsKey('vdom') ) {
                 $devname += "[$vdom]"
             }
-            $_device | add-member -name "devname" -membertype NoteProperty -Value $devname
+            $_device | Add-Member -name "devname" -membertype NoteProperty -Value $devname
         }
         else {
             #if not devname, look there is a devid (=serial number)
@@ -156,14 +156,14 @@ function Add-FAZLogviewLogsearch {
                 $devid = "All_FortiGate"
             }
 
-            $_device | add-member -name "devid" -membertype NoteProperty -Value $devid
+            $_device | Add-Member -name "devid" -membertype NoteProperty -Value $devid
         }
 
-        $_logsearch | add-member -name "device" -membertype NoteProperty -Value @($_device)
+        $_logsearch | Add-Member -name "device" -membertype NoteProperty -Value @($_device)
 
-        $_logsearch | add-member -name "time-order" -membertype NoteProperty -Value "desc"
+        $_logsearch | Add-Member -name "time-order" -membertype NoteProperty -Value "desc"
 
-        $_time = new-Object -TypeName PSObject
+        $_time = New-Object -TypeName PSObject
 
         #get log from last 1hour by default but can be change
         $end = Get-Date
@@ -175,12 +175,12 @@ function Add-FAZLogviewLogsearch {
             '30d' { $start = $end.Addhours(-24 * 30) }
         }
 
-        $_time | add-member -name "end" -membertype NoteProperty -Value $end.ToString("yyyy-MM-dd HH:mm")
-        $_time | add-member -name "start" -membertype NoteProperty -Value $start.ToString("yyyy-MM-dd HH:mm")
+        $_time | Add-Member -name "end" -membertype NoteProperty -Value $end.ToString("yyyy-MM-dd HH:mm")
+        $_time | Add-Member -name "start" -membertype NoteProperty -Value $start.ToString("yyyy-MM-dd HH:mm")
 
-        $_logsearch | add-member -name "time-range" -membertype NoteProperty -Value $_time
+        $_logsearch | Add-Member -name "time-range" -membertype NoteProperty -Value $_time
 
-        $_logsearch | add-member -name "limit" -membertype NoteProperty -Value 10000
+        $_logsearch | Add-Member -name "limit" -membertype NoteProperty -Value 10000
 
         #add filter
         $cfilter = @()
@@ -221,7 +221,7 @@ function Add-FAZLogviewLogsearch {
         }
 
         if ($cfilter) {
-            $_logsearch | add-member -name "filter" -membertype NoteProperty -Value ( $cfilter -join " and ")
+            $_logsearch | Add-Member -name "filter" -membertype NoteProperty -Value ( $cfilter -join " and ")
         }
         $tid = Invoke-FAZRestMethod -method "add" -body $_logsearch -jsonrpc "2.0" -uri $uri -connection $connection
         $tid.tid
@@ -300,10 +300,10 @@ function Get-FAZLogviewLogsearch {
 
         $uri = "/logview/adom/$($adom)/logsearch/$($tid)"
 
-        $_logsearch = new-Object -TypeName PSObject
+        $_logsearch = New-Object -TypeName PSObject
 
-        $_logsearch | add-member -name "limit" -membertype NoteProperty -Value $limit
-        $_logsearch | add-member -name "offset" -membertype NoteProperty -Value $offset
+        $_logsearch | Add-Member -name "limit" -membertype NoteProperty -Value $limit
+        $_logsearch | Add-Member -name "offset" -membertype NoteProperty -Value $offset
 
         $wait = 0
         do {
