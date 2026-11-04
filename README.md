@@ -95,11 +95,11 @@ Go on WebGUI of your FortiAnalyzer, on System Settings
 ![](./Medias/FAZ_Home.png)  
 
 Go `Administrators`  
-![](./Medias/FAZ_Admin.PNG)  
+![](./Medias/FAZ_Admin.png)  
 
 Click on `Create New` => `Administrator`   
 
-![](./Medias/FAZ_New_Admin_API.PNG)  
+![](./Medias/FAZ_New_Admin_API.png)  
 and Create or edit the administrator account. 
    -Enable **JSON API Access** and select **Read** or **Read-Write**,
    -  depending on the operations you need. Configure the appropriate **Admin Profile**.
