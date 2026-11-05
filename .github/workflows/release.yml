@@ -13,4 +13,4 @@ jobs:
       - name: Publish
         shell: pwsh
         run: |
-          Publish-Module -Path ./PowerFGT -NuGetApiKey ${{ secrets.PSGALLERY_API_KEY }}
+          Publish-Module -Path ./PowerFAZ -NuGetApiKey ${{ secrets.PSGALLERY_API_KEY }}
